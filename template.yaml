@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Coleta de dados.
+Resources:
+  # Criar função lambda agendada
+  lambdafunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: dataops-coleta-vacinas-ci-cd # nome da função
+      Handler: lambda_function.lambda_handler # nome do arquivo e método de onde está a função
+      Runtime: python3.7 # ambiente de execução
+      CodeUri: ./app # local onde estarão os arquivos da função
+      Description: Coletar dados de vacinas.
+      MemorySize: 512 # memória utilizada pela funçãop
+      Timeout: 900 # tempo máximo de execução, em segundos
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole # IAM role da função para permissões a outros recursos da AWS
+      Events: # Evento agendado para execução
+        ScheduledFunction:
+          Type: Schedule
+          Properties:
+            Schedule: cron(15 00 * * ? *) # executa todo dia às 10:15
+            Name: dataops-agenda-coleta-vacina
+            Input: '{
+              "url":"https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIPNI/COVID/uf/uf%3DAC/part-00000-ebb720ff-cda9-42f4-90a0-e4c8a15c22aa.c000.csv", 
+              "uf":"ac"
+            }' # evento com parâmetros que serão enviados para a função lambda
+            #  OBS: O Link abaixo é dinâmico. Pegue outro link de arquivo de vacinação aqui: https://opendatasus.saude.gov.br/dataset/covid-19-vacinacao/resource/5093679f-12c3-4d6b-b7bd-07694de54173
