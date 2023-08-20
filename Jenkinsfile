@@ -11,7 +11,7 @@ pipeline {
     stage('deploy') {
       environment {
         STACK_NAME = 'dataops-coleta-vacinas-stack'
-        S3_BUCKET = 'dataops-deploy-fernandosousa'
+        S3_BUCKET = 'dataops-dados-fernandosousa'
       }
       steps {
         unstash 'venv'        
